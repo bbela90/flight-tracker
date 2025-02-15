@@ -1,7 +1,7 @@
-import { Flight, FlightWithId } from '../common/interfaces/flights';
+import { FlightDto, FlightWithIdDto } from '../common/dto/flights.dto';
 import { WithId } from 'mongodb';
 
-export function transformFlight(document: WithId<Flight>): FlightWithId {
+export function transformFlight(document: WithId<FlightDto>): FlightWithIdDto {
   const { _id, ...rest } = document;
   return {
     ...rest,

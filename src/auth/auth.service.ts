@@ -1,6 +1,6 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDetails } from '../common/interfaces/auth';
+import { LoginDetailsDto, TokenDto } from '../common/dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -8,18 +8,29 @@ export class AuthService {
 
   constructor(private readonly jwtService: JwtService) {}
 
-  login(loginData: LoginDetails) {
+  login(loginData: LoginDetailsDto): TokenDto {
     if (loginData.username !== 'admin' || loginData.password !== 'password') {
       throw new UnauthorizedException('Invalid credentials');
     }
-    // TODO add userID to payload -- sub: user.id
-    const payload = { username: loginData.username };
-    return { access_token: this.jwtService.sign(payload) };
+
+    const payload = {
+      username: loginData.username,
+      sub: '12345', // TODO: Replace with real user ID from database
+    };
+
+    return {
+      token: this.jwtService.sign(payload),
+    };
   }
 
-  verifyToken(token: string) {
-    // TODO give back user
-    this.jwtService.verify(token);
-    return true;
+  verifyToken(token: string): boolean {
+    try {
+      // TODO maybe decode and give back username
+      this.jwtService.verify(token);
+      return true;
+    } catch (error) {
+      this.logger.log('Verify token error', error);
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 }
