@@ -1,6 +1,8 @@
 export interface AuthConfig {
   jwtSecret: string;
   jwtExpiration: string;
+  username: string;
+  password: string;
 }
 
 export interface AppConfig {

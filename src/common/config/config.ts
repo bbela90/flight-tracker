@@ -5,6 +5,8 @@ export default () => {
     auth: {
       jwtSecret: process.env.JWT_SECRET,
       jwtExpiration: process.env.JWT_EXPIRATION_TIME,
+      username: process.env.USER_NAME,
+      password: process.env.PASSWORD,
     },
     app: {
       port: Number(process.env.PORT) || 3000,

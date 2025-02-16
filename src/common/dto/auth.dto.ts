@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDetailsDto {
@@ -24,4 +24,26 @@ export class TokenDto {
     description: 'Access token for authentication',
   })
   token: string;
+}
+
+export class JwtPayloadDto {
+  @IsString()
+  username: string;
+
+  @IsString()
+  sub: string;
+
+  @IsNumber()
+  iat: number;
+
+  @IsNumber()
+  exp: number;
+}
+
+export class VerifiedUserDataDto {
+  @IsString()
+  username: string;
+
+  @IsString()
+  id: string;
 }

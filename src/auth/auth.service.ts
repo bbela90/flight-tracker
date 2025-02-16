@@ -1,21 +1,37 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDetailsDto, TokenDto } from '../common/dto/auth.dto';
+import {
+  JwtPayloadDto,
+  LoginDetailsDto,
+  TokenDto, VerifiedUserDataDto,
+} from '../common/dto/auth.dto';
+import { ConfigService } from '@nestjs/config';
+import { AuthConfig } from '../common/interfaces/config';
+import { generateUserId } from '../utils/token.utils';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private authConfig: AuthConfig;
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
+  ) {
+    this.authConfig = this.config.get('auth') as AuthConfig;
+  }
 
   login(loginData: LoginDetailsDto): TokenDto {
-    if (loginData.username !== 'admin' || loginData.password !== 'password') {
+    if (
+      loginData.username !== this.authConfig.username ||
+      loginData.password !== this.authConfig.password
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload = {
       username: loginData.username,
-      sub: '12345', // TODO: Replace with real user ID from database
+      sub: generateUserId(),
     };
 
     return {
@@ -23,11 +39,13 @@ export class AuthService {
     };
   }
 
-  verifyToken(token: string): boolean {
+  verifyToken(token: string): VerifiedUserDataDto {
     try {
-      // TODO maybe decode and give back username
-      this.jwtService.verify(token);
-      return true;
+      const decodedToken: JwtPayloadDto = this.jwtService.verify(token);
+      this.logger.log(
+        `Token verified for user: ${decodedToken.username} id: ${decodedToken.sub}`,
+      );
+      return { username: decodedToken.username, id: decodedToken.sub };
     } catch (error) {
       this.logger.log('Verify token error', error);
       throw new UnauthorizedException('Invalid token');
