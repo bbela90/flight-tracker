@@ -12,10 +12,10 @@ export class FlightsService {
 
   constructor(private readonly dbService: DbService) {}
 
-  async addFlight(data: FlightDto): Promise<string> {
+  async addFlight(data: FlightDto): Promise<FlightWithIdDto> {
     this.logger.log(`Adding flight with data ${JSON.stringify(data)}`);
-    const result = await this.dbService.flightsDb.insertOne(data);
-    return result.insertedId.toHexString();
+    const result = await this.dbService.flightsDb.insertOne({ ...data });
+    return { id: result.insertedId.toHexString(), ...data };
   }
 
   async getAllFlights(): Promise<FlightWithIdDto[]> {
