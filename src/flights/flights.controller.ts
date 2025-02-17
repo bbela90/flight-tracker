@@ -12,6 +12,8 @@ import { FlightsService } from './flights.service';
 import { FlightDto, FlightWithIdDto } from '../common/dto/flights.dto';
 import { ApiTags, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
+// TODO consider dto for flight id too and validate @Length(24, 24)
+
 @ApiSecurity('bearerAuth')
 @ApiTags('Flights')
 @ApiResponse({ status: 401, description: 'User is not authenticated' })

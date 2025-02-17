@@ -1,10 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../../src/app/app.module';
-import { TokenDto } from '../../src/common/dto/auth.dto';
-import { MongoClient } from 'mongodb';
 
 describe('Auth (e2e)', () => {
   let app: INestApplication<App>;
@@ -15,6 +13,7 @@ describe('Auth (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });
 
@@ -22,7 +21,7 @@ describe('Auth (e2e)', () => {
     await app.close();
   });
 
-  it('POST /auth should return a JWT token with valid credentials', async () => {
+  it('/auth should return a token', async () => {
     const loginData = {
       username: 'testuser',
       password: 'testpassword1',
@@ -34,5 +33,30 @@ describe('Auth (e2e)', () => {
       .expect(201);
 
     expect(response.body).toHaveProperty('token');
+  });
+
+  it('/auth should return 400 for invalid payload', async () => {
+    const invalidAuthPayload = { username: 'testuser' };
+
+    const response = await request(app.getHttpServer())
+      .post('/auth')
+      .send(invalidAuthPayload)
+      .expect(400);
+
+    expect(response.body).toHaveProperty('message');
+  });
+
+  it('/auth should return 401 for wrong password', async () => {
+    const loginData = {
+      username: 'testuser',
+      password: 'testpassword3',
+    };
+
+    const response = await request(app.getHttpServer())
+      .post('/auth')
+      .send(loginData)
+      .expect(401);
+
+    expect(response.body).toHaveProperty('message');
   });
 });

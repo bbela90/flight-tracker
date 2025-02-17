@@ -15,8 +15,8 @@ describe('FlightsService Tests', () => {
     aircraft: 'Boeing 737',
     flightNumber: 'UA123',
     schedule: { std: '2025-02-15T14:30:00Z', sta: '2025-02-15T17:30:00Z' },
-    departure: 'JFK',
-    destination: 'LAX',
+    departure: 'BUDA',
+    destination: 'CRLA',
   };
 
   const mockFlightsDb: Partial<Collection<FlightDto>> = {
@@ -67,8 +67,8 @@ describe('FlightsService Tests', () => {
           std: '2025-02-15T14:30:00Z',
           sta: '2025-02-15T17:30:00Z',
         },
-        departure: 'BRU',
-        destination: 'BUD',
+        departure: 'BRUS',
+        destination: 'BUDA',
       },
       {
         _id: new ObjectId('65a9c9f0e5b5c8b5bfb3d7f2'),
@@ -78,8 +78,8 @@ describe('FlightsService Tests', () => {
           std: '2025-03-15T10:00:00Z',
           sta: '2025-03-15T13:00:00Z',
         },
-        departure: 'BUD',
-        destination: 'BRU',
+        departure: 'BUDA',
+        destination: 'BRUL',
       },
     ];
 
