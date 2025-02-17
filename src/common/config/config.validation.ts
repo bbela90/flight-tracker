@@ -1,9 +1,9 @@
-import { IsInt, IsString } from 'class-validator';
+import { IsInt, IsString, Matches, MinLength } from 'class-validator';
 import { Transform, plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 
 export class ConfigValidationDto {
-  @Transform(({ value }) => Number(value)) // Converts value to a number
+  @Transform(({ value }) => Number(value))
   @IsInt()
   PORT: number;
 
@@ -12,6 +12,16 @@ export class ConfigValidationDto {
 
   @IsString()
   JWT_EXPIRATION_TIME: string;
+
+  @IsString()
+  @MinLength(5, { message: 'Username must be at least 8 characters long' })
+  USER_NAME: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @Matches(/\d/, { message: 'Password must contain at least one number' })
+  @Matches(/[a-zA-Z]/, { message: 'Password must contain at least one letter' })
+  PASSWORD: string;
 
   @IsString()
   DB_HOST_URL: string;

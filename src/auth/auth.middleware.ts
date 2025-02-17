@@ -13,7 +13,7 @@ export class AuthMiddleware implements NestMiddleware {
 
   constructor(private readonly authService: AuthService) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
+  use(req: Request, _res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Token missing');
@@ -21,7 +21,7 @@ export class AuthMiddleware implements NestMiddleware {
     const token = authHeader.split(' ')[1];
 
     try {
-      req['user'] = this.authService.verifyToken(token); // TODO Attach user info to request
+      req['user'] = this.authService.verifyToken(token);
       next();
     } catch (e) {
       this.logger.log('Error verifying token', e);
