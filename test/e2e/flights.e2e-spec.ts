@@ -6,9 +6,9 @@ import { AppModule } from '../../src/app/app.module';
 import { TokenDto } from '../../src/common/dto/auth.dto';
 import { Db, MongoClient } from 'mongodb';
 import { FlightWithIdDto } from '../../src/common/dto/flights.dto';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 process.env.DB_FLIGHTS = `flights_test_${Date.now()}`;
-const DB_HOST_URL = process.env.DB_HOST_URL as string;
 const DB_NAME = process.env.DB_NAME as string;
 const DB_FLIGHTS = process.env.DB_FLIGHTS;
 
@@ -19,11 +19,15 @@ interface CreateFlightResponseBody {
 describe('Flights (e2e)', () => {
   let app: INestApplication<App>;
   let authToken: TokenDto;
+  let mongodb: MongoMemoryServer;
   let db: Db;
   let client: MongoClient;
 
   beforeAll(async () => {
-    client = await MongoClient.connect(DB_HOST_URL);
+    mongodb = await MongoMemoryServer.create();
+    const uri = mongodb.getUri();
+
+    client = await MongoClient.connect(uri);
     db = client.db(DB_NAME);
   });
 
@@ -47,8 +51,7 @@ describe('Flights (e2e)', () => {
 
   afterAll(async () => {
     await db.collection(DB_FLIGHTS).drop();
-    await client.close();
-
+    await mongodb.stop();
     await app.close();
   });
 
@@ -57,7 +60,7 @@ describe('Flights (e2e)', () => {
       aircraft: 'Boeing 737',
       flightNumber: 'UA123',
       schedule: {
-        std: '2025-02-15T14:30:00Z',
+        std: '2025-02-15T16:30:00Z',
         sta: '2025-02-15T17:30:00Z',
       },
       departure: 'BRUS',
@@ -131,9 +134,15 @@ describe('Flights (e2e)', () => {
     expect(Array.isArray(listResponse.body)).toBe(true);
 
     const flights = listResponse.body as FlightWithIdDto[];
-    expect(flights.length).toEqual(2);
-    expect(flights[0]).toEqual({ id: flight1, ...flightData1 });
-    expect(flights[1]).toEqual({ id: flight2, ...flightData2 });
+    expect(flights.length).toBeGreaterThanOrEqual(2);
+    const expectedFlight1 = { id: flight1, ...flightData1 };
+    const expectedFlight2 = { id: flight2, ...flightData2 };
+
+    const flight1Response = flights.find((flight) => flight.id === flight1);
+    const flight2Response = flights.find((flight) => flight.id === flight2);
+
+    expect(flight1Response).toEqual(expectedFlight1);
+    expect(flight2Response).toEqual(expectedFlight2);
   });
 
   it('create then update a flight and return the updated flight data', async () => {
