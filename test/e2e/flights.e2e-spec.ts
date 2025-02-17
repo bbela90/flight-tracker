@@ -28,6 +28,7 @@ describe('Flights (e2e)', () => {
     const uri = mongodb.getUri();
 
     client = await MongoClient.connect(uri);
+    process.env.DB_HOST_URL = uri;
     db = client.db(DB_NAME);
   });
 

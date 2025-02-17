@@ -3,9 +3,21 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../../src/app/app.module';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoClient } from 'mongodb';
 
 describe('Auth (e2e)', () => {
   let app: INestApplication<App>;
+  let mongodb: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongodb = await MongoMemoryServer.create();
+    const uri = mongodb.getUri();
+
+    const client = await MongoClient.connect(uri);
+    process.env.DB_HOST_URL = uri;
+    client.db(process.env.DB_NAME);
+  });
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -18,6 +30,7 @@ describe('Auth (e2e)', () => {
   });
 
   afterAll(async () => {
+    await mongodb.stop();
     await app.close();
   });
 
